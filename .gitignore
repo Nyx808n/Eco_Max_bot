@@ -1,3 +1,5 @@
 #idea user settings
 .idea/
 .vs/
+
+__pycache__/
