@@ -49,7 +49,7 @@ def create_user(user_id: int, username: str):
         if existing_user:
             return existing_user  # Если пользователь то возвращаем его
 
-        # Если нет, создаем нового
+        # Если нет создаем нового
         new_user = User(user_id=user_id, username=username, is_consent_pd=True)
         db.add(new_user)
         db.commit()
