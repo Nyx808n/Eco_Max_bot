@@ -1,4 +1,4 @@
-﻿from sqlalchemy import create_engine, Column, BigInteger, String, Boolean, Integer, Float, Text
+﻿from sqlalchemy import create_engine, Column, BigInteger, String, Boolean, Integer, Float
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from config import settings
 
