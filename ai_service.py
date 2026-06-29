@@ -32,9 +32,10 @@ class AIServes:
     def GenerationEcoAdvice(self)-> Optional[str]:
         contex = "Сгенерируй интересный эко совет не поврторяя прошлые" #then edit promt
         return self.ReceivingAnswerFromAi(contex)
-    
 
-
+    def GenerationEcoChallenge(self)-> Optional[str]:
+        contex = "Сгенерируй интнресный простой эко челедж не повторяя прошлые (один челедж на один день)" #then edit promt
+        return self.ReceivingAnswerFromAi(contex)
 
 ai_service = AIServes()
 
@@ -53,6 +54,16 @@ if __name__ == "__main__":
     print("Совет для бота \n")
 
     Answer = ai_service.GenerationEcoAdvice()
+
+    if Answer:
+        print(Answer)
+    else:
+        print("error\n")
+
+    print("\n\n")
+    print("Челедж для бота \n")
+
+    Answer = ai_service.GenerationEcoChallenge()
 
     if Answer:
         print(Answer)
