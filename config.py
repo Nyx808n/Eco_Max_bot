@@ -17,6 +17,11 @@ class BotConfig(BaseSettings):
     DB_USER: str = "postgres"
     DB_PASSWORD: str
 
+    #API
+
+    YANDEX_MAPS_API_KEY: str = None
+    GIGACHAT_AUTH_KEY: Optional[str] = None
+
     @property
     def database_url(self) -> str:
         """Получение строки для подключения SQLAlchemy"""
