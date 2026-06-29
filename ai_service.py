@@ -29,15 +29,32 @@ class AIServes:
             print("error in AIServes|ReceivingAnswerFromAi")
             return None
 
+    def GenerationEcoAdvice(self)-> Optional[str]:
+        contex = "Сгенерируй интересный эко совет не поврторяя прошлые" #then edit promt
+        return self.ReceivingAnswerFromAi(contex)
+    
+
+
 
 ai_service = AIServes()
 
 if __name__ == "__main__":
-    print("start")
+    print("start\n")
 
-    Answer = ai_service.ReceivingAnswerFromAi("сгенерируй совет для эко дня")
+    print("promt сгенерируй эко совет для майнкрафта\n")
+    Answer = ai_service.ReceivingAnswerFromAi("сгенерируй эко совет для майнкрафта")
 
     if Answer:
         print(Answer)
     else:
-        print("error")
+        print("error\n")
+
+    print("\n\n")
+    print("Совет для бота \n")
+
+    Answer = ai_service.GenerationEcoAdvice()
+
+    if Answer:
+        print(Answer)
+    else:
+        print("error\n")
