@@ -29,8 +29,8 @@ class AIServes:
         context = "Сгенерируй интересный эко совет не поврторяя прошлые" #then edit promt
         return self.receiving_answer_from_ai(context)
 
-    def generation_eco_challenge(self)-> Optional[str]:
-        context = "Сгенерируй интнресный простой эко челедж не повторяя прошлые (один челедж на один день)" #then edit promt
+    def generation_eco_challenge(self) -> Optional[str]:
+        context = "Сгенерируй ОДИН короткий и простой эко-челлендж, который можно выполнить за один день (например, собрать 5 пластиковых бутылок, пройти пешком 1 км, выключить свет). Ответ должен быть СТРОГО 1-2 предложениями. Не пиши планы на неделю и неповторяй челеджи!"
         return self.receiving_answer_from_ai(context)
 
     def generation_quiz_question(self, topic: str = "")-> Optional[dict]:

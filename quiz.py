@@ -1,6 +1,5 @@
 ﻿from typing import Optional, Dict, List
 
-import recycling_points
 from ai_service import ai_service
 from database import get_user, update_user_quiz_points
 from config import settings
@@ -76,8 +75,6 @@ if __name__ == "__main__":
     qu = start_quiz(user_id=test_user_id, topic="экология")
 
     if qu:
-        print("error")
-
         print("Вопрос успешно сгенерирован:")
         print(f"Вопрос: {qu['question']}")
         print(f"Варианты: {qu['options']}")
@@ -87,14 +84,14 @@ if __name__ == "__main__":
 
         print("\n\n")
 
-        print("Проврека отвтов")
+        print("Проверка ответов")
         answer = int(input("Введите ответ "))
 
         dict_answer = check_correct_answer(user_id=test_user_id, answer_index=answer, question=qu)
 
         if dict_answer:
             print(dict_answer.get("message"))
-            print(f"общие очки виктоин пользователся {get_user(user_id=test_user_id).username} состовляют {get_user(user_id=test_user_id).quiz_points}")
+            print(f"общие очки викторины пользователся {get_user(user_id=test_user_id).username} составляют {get_user(user_id=test_user_id).quiz_points}")
         else:
             print("error")
     else:
