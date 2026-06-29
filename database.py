@@ -17,6 +17,7 @@ class User(Base):
     is_consent_pd = Column(Boolean, default=False)             # Согласие на обработку ПД
     quiz_points = Column(Integer, default=0)                   # Баллы викторины
     challenge_points = Column(Integer, default=0)              # Баллы челеджи
+    is_subscribed_newsletter = Column(Boolean, default=False)  # Подписка на рассылку эко советов
 
 class RecyclingPoint(Base):
     """Таблица пунктов приема отходов"""
@@ -89,6 +90,34 @@ def update_user_challenge_points(user_id: int, challenge_points_to_add: int):
             db.commit()
             return True
         return False
+    finally:
+        db.close()
+def update_newsletter_status(user_id: int, status: bool):
+    """Обновляет статус подписки на рассылку"""
+    db = get_db_session()
+    try:
+        user = db.query(User).filter(User.user_id == user_id).first()
+        if user:
+            user.is_subscribed_newsletter = status
+            db.commit()
+    finally:
+        db.close()
+
+def is_user_subscribed(user_id: int) -> bool:
+    """Проверяет, подписан ли пользователь на рассылку"""
+    db = get_db_session()
+    try:
+        user = db.query(User).filter(User.user_id == user_id).first()
+        return user.is_subscribed_newsletter if user else False
+    finally:
+        db.close()
+
+def get_subscribed_users() -> list:
+    """Возвращает список ID всех подписанных пользователей"""
+    db = get_db_session()
+    try:
+        users = db.query(User).filter(User.is_subscribed_newsletter == True).all()
+        return [user.user_id for user in users]
     finally:
         db.close()
 

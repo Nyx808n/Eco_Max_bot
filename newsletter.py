@@ -2,124 +2,185 @@
 # Модуль рассылки эко-советов пользователям
 
 import random
+from datetime import datetime
+from ai_service import ai_service
+
 import schedule
 import time
-from datetime import datetime
+
+from config import settings
+from database import (
+    get_user,
+    update_newsletter_status,
+    is_user_subscribed,
+    get_subscribed_users,
+)
 
 
-def subscribe_user(user_id):
+def generate_eco_tip_with_ai() -> str:
     """
-    Оформление подписки пользователя на ежедневные эко-советы.
+    Генерирует эко-совет через ИИ.
+    """
+    
+    advice = ai_service.generation_eco_advice()
+
+    if not advice:
+        return "Ошибка генерации эко совета. \n Мы уже занимаемся решением данной проблемы. \n Ожидайте."
+
+    return advice
+
+
+def subscribe_user(user_id: int) -> str:
+    """
+    Оформляет подписку пользователя на ежедневные эко-советы.
     """
 
-    # Обращение к database.py
-    # database.update_newsletter_status(user_id, True)
+    user = get_user(user_id)
 
-    return "Вы успешно подписались на ежедневные эко-советы!"
+    if not user:
+        return "Сначала необходимо пройти регистрацию."
+
+    update_newsletter_status(user_id, True)
+
+    return "Вы успешно подписались на ежедневные эко-советы."
 
 
-def unsubscribe_user(user_id):
+def unsubscribe_user(user_id: int) -> str:
     """
-    Отключение подписки пользователя от рассылки.
+    Отключает подписку пользователя на ежедневные эко-советы.
     """
 
-    # Обращение к database.py
-    # database.update_newsletter_status(user_id, False)
+    user = get_user(user_id)
+
+    if not user:
+        return "Пользователь не найден."
+
+    update_newsletter_status(user_id, False)
 
     return "Вы отписались от ежедневной рассылки эко-советов."
 
 
-def get_eco_tip_of_day():
+def create_eco_tip_message() -> str:
     """
-    Выбор эко-совета дня.
-    """
-
-    # Обращение к database.py
-    # eco_tips = database.get_all_eco_tips()
-
-    eco_tips = [
-        "Используйте многоразовую бутылку вместо пластиковых бутылок.",
-        "Сортируйте бумагу, пластик, стекло и металл отдельно.",
-        "Выключайте свет, когда выходите из комнаты.",
-        "Берите с собой многоразовую сумку в магазин.",
-        "Сдавайте батарейки в специальные пункты приёма.",
-        "Сократите использование одноразовой посуды.",
-        "Пользуйтесь общественным транспортом или ходите пешком чаще."
-    ]
-
-    if not eco_tips:
-        return "Сегодня эко-совет недоступен."
-
-    return random.choice(eco_tips)
-
-
-def send_daily_tip_to_user(user_id):
-    """
-    Отправка ежедневного эко-совета одному пользователю.
+    Формирует сообщение с эко-советом.
     """
 
-    eco_tip = get_eco_tip_of_day()
+    eco_tip = generate_eco_tip_with_ai()
 
-    message = f"🌱 Эко-совет дня:\n\n{eco_tip}"
+    return f"🌱 Эко-совет дня:\n\n{eco_tip}"
 
-    # Обращение к main.py или модулю отправки сообщений
-    # bot.send_message(user_id, message)
 
-    print(f"Сообщение отправлено пользователю {user_id}: {message}")
+def send_eco_tip_now(user_id: int) -> str:
+    """
+    Возвращает пользователю эко-совет сразу после нажатия кнопки.
+    """
+
+    user = get_user(user_id)
+
+    if not user:
+        return "Сначала необходимо пройти регистрацию."
+
+    return create_eco_tip_message()
+
+
+def send_daily_tip_to_user(user_id: int) -> str:
+    """
+    Формирует ежедневный эко-совет для одного пользователя.
+    """
+
+    message = create_eco_tip_message()
+
+    # Здесь main.py должен отправить это сообщение пользователю через MAX API
+    # Например:
+    # send_message(user_id, message)
+
+    print(f"Эко-совет отправлен пользователю {user_id}")
 
     return message
 
 
-def send_daily_tips_to_all_users():
+def send_daily_tips_to_all_users() -> None:
     """
-    Отправка ежедневного совета всем подписанным пользователям.
+    Отправляет ежедневный эко-совет всем подписанным пользователям.
     """
 
-    # Обращение к database.py
-    # users = database.get_subscribed_users()
-
-    users = [101, 102, 103]  # Временные данные для примера
+    users = get_subscribed_users()
 
     for user_id in users:
         send_daily_tip_to_user(user_id)
 
-    print(f"Рассылка выполнена: {datetime.now()}")
+    print(f"Рассылка эко-советов выполнена: {datetime.now()}")
 
 
-def start_newsletter_schedule():
+def start_newsletter_schedule() -> None:
     """
-    Запуск рассылки по расписанию.
-    По ТЗ советы отправляются ежедневно.
+    Запускает ежедневную рассылку по расписанию.
     """
 
-    schedule.every().day.at("09:00").do(send_daily_tips_to_all_users)
+    schedule.every().day.at(settings.NEWSLETTER_TIME).do(send_daily_tips_to_all_users)
 
-    print("Рассылка эко-советов запущена. Время отправки: 09:00")
+    print(f"Рассылка эко-советов запущена на {settings.NEWSLETTER_TIME}")
 
     while True:
         schedule.run_pending()
         time.sleep(60)
 
 
-def handle_newsletter_button(user_id, action):
+def get_newsletter_status_text(user_id: int) -> str:
     """
-    Обработка кнопок рассылки.
+    Возвращает текст о статусе подписки пользователя.
     """
 
-    # Обращение к buttons.py
-    # Отвечает за кнопки:
-    # - Подписаться на эко-советы
-    # - Отключить рассылку
-    # - Получить совет сейчас
+    if is_user_subscribed(user_id):
+        return "Вы уже подписаны на ежедневные эко-советы."
 
-    if action == "subscribe":
+    return "Вы пока не подписаны на ежедневные эко-советы."
+
+
+def handle_newsletter_button(user_id: int, callback: str) -> str:
+    """
+    Обрабатывает кнопки раздела 'Эко-совет дня'.
+    """
+
+    if callback == "eco_tip":
+        return send_eco_tip_now(user_id)
+
+    if callback == "eco_tip_subscribe":
+        return "Подтвердите подписку на ежедневные эко-советы."
+
+    if callback == "eco_tip_confirm_subscribe":
         return subscribe_user(user_id)
 
-    elif action == "unsubscribe":
+    if callback == "eco_tip_unsubscribe":
         return unsubscribe_user(user_id)
 
-    elif action == "get_tip_now":
-        return send_daily_tip_to_user(user_id)
+    return "Неизвестное действие."
 
-    else:
-        return "Неизвестное действие."
+
+if __name__ == "__main__":
+    from database import init_db, create_user
+
+    print("newsletter.py\n")
+
+    init_db()
+
+    test_user_id = 999888777
+    create_user(user_id=test_user_id, username="NewsletterTestUser")
+
+    # Тест 1: Проверка статуса до подписки
+    print("1. Статус до подписки:")
+    print(get_newsletter_status_text(test_user_id))
+
+    # Тест 2: Подписка
+    print("\n2. Оформление подписки:")
+    print(subscribe_user(test_user_id))
+    print(get_newsletter_status_text(test_user_id))
+
+    # Тест 3: Получение совета прямо сейчас
+    print("\n3. Получение эко-совета:")
+    print(send_eco_tip_now(test_user_id))
+
+    # Тест 4: Отписка
+    print("\n4. Отписка от рассылки:")
+    print(unsubscribe_user(test_user_id))
+    print(get_newsletter_status_text(test_user_id))
