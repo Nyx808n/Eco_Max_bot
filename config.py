@@ -9,7 +9,8 @@ class BotConfig(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", case_sensitive=False)
 
     MAX_BOT_TOKEN : str
-    MAX_WEBHOOK_URL: Optional[str] = None
+    MAX_WEBHOOK_URL: str
+    API_URL: str
 
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432
